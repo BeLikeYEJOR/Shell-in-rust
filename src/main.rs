@@ -1,7 +1,7 @@
 use std::io::{self, Write};
 use std::collections::HashMap;
 
-fn command_setup() {
+fn command_setup() -> HashMap<&'static str, &'static str> {
     let mut list_of_commands = HashMap::new();
     list_of_commands.insert("echo", "echo <text>");
     list_of_commands.insert("exit", "exit");
@@ -15,7 +15,7 @@ fn command_setup() {
 fn main() {
     let stdin = io::stdin();
     let mut command_history: Vec<String> = Vec::new();
-    command_history();
+    let mut list_of_commands = command_setup();
     loop {
         print!("$ ");
         io::stdout().flush().unwrap();
@@ -29,7 +29,7 @@ fn main() {
 
         let head = command.next();
         let tail = command.collect::<Vec<&str>>().join(" ");
-        
+
         match head {
             Some("exit") => std::process::exit(0),
             Some("echo") => println!("{}", tail),
@@ -38,9 +38,18 @@ fn main() {
                 _ => println!("{tail}: not found"),
             },
             Some("help") => {
-                // for (cmd, desc) in &list_of_commands {
-                //     println!("{} - {}", cmd, desc)
-                // }
+            // if(tail.is_empty()) {
+            //     for (cmd, desc) in &list_of_commands {
+            //         println!("{} - {}", cmd, desc)
+            //     }
+            // } else {
+            //     if list_of_commands.contains_key(&tail) {
+            //         println!("{} - {}", entry.key(), entry.or_default())
+            //     } else {
+            //         println!("{}: is not a valid command", tail);
+            //     }
+            // }
+
                 match tail.as_str() {
                     s if s.is_empty() => {
                         for (cmd, desc) in &list_of_commands {
