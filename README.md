@@ -1,6 +1,9 @@
 # To use the shell:
-# Go to the latest release and download the zip folder
-## After you did that extract it and open the extracted folder into your terminal
 
-# And lastly run `cargo run` to run the terminal
-## Then type `help` to get all the commands you are able to run
+# Go to the latest release and download the zip folder for your System
+
+## After you did that extract it and open the extracted folder -> target -> Shell.exe(For Windows, could be different depending on your OS)
+
+# And lastly run any commands you like😁
+
+## Id recomend typing `help` to get all the commands you are able to run
