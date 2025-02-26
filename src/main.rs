@@ -15,7 +15,7 @@ fn command_setup() -> HashMap<&'static str, &'static str> {
 fn main() {
     let stdin = io::stdin();
     let mut command_history: Vec<String> = Vec::new();
-    let mut list_of_commands = command_setup();
+    let list_of_commands = command_setup();
     loop {
         print!("$ ");
         io::stdout().flush().unwrap();
