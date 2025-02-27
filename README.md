@@ -2,7 +2,7 @@
 
 # Go to the latest release and download the zip folder for your System
 
-## After you did that extract it and open the extracted folder -> target -> Shell.exe(For Windows, could be different depending on your OS)
+## After you did that extract it and open the extracted folder -> target -> release -> Shell.exe(For Windows, could be different depending on your OS)
 
 # And lastly run any commands you like😁
 
