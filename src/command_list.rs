@@ -16,6 +16,7 @@ pub fn command_setup() -> HashMap<&'static str, &'static str> {
     list_of_commands.insert("rmdir", "rmdir <dirName>");
     list_of_commands.insert("touch", "touch <fileName>");
     list_of_commands.insert("rmf", "rmf <fileName>");
+    list_of_commands.insert("ls", "ls");
     list_of_commands
 }
 

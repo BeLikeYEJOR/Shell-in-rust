@@ -13,7 +13,7 @@ fn main() {
     
     loop {
         // Use get_prompt() to display a shorter prompt.
-        print!("{} $ ", get_prompt());
+        print!("~ {} $ ", get_prompt());
         io::stdout().flush().unwrap();
 
         let mut input = String::new();
@@ -103,7 +103,39 @@ fn main() {
                 if let Err(e) = fs::remove_file(tail) {
                     println!("{}", e);
                 }
-            }
+            },
+            Some("ls") => {
+                let current_dir = match env::current_dir() {
+                    Ok(dir) => dir,
+                    Err(e) => {
+                        println!("Error retrieving current directory: {}", e);
+                        continue;
+                    }
+                };
+                match fs::read_dir(&current_dir) {
+                    Ok(entries) => {
+                        for entry_result in entries {
+                            match entry_result {
+                                Ok(entry) => {
+                                    let file_name = entry.file_name().to_string_lossy().to_string();
+                                    match entry.metadata() {
+                                        Ok(metadata) => {
+                                            if metadata.is_dir() {
+                                                println!("{}/", file_name);
+                                            } else {
+                                                println!("{}", file_name);
+                                            }
+                                        },
+                                        Err(e) => println!("Error reading metadata: {}", e),
+                                    }
+                                },
+                                Err(e) => println!("Error reading directory entry: {}", e),
+                            }
+                        }
+                    },
+                    Err(e) => println!("Error reading directory: {}", e),
+                }
+            },            
             _ => println!("{}: command not found", input.trim()),
         }
     }
