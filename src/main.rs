@@ -1,11 +1,12 @@
 // use std::env;
-use std::fs;
+use std::fs::{self};
 use std::io::{self, Write};
 mod command_list;
 mod command_functions;
 use command_functions::ls;
 use command_functions::cd;
 use command_functions::help;
+use command_functions::mv;
 use command_list::command_setup;
 use command_list::get_prompt;
 
@@ -64,6 +65,14 @@ fn main() {
             Some("rmf") => {
                 if let Err(e) = fs::remove_file(tail) {
                     println!("{}", e);
+                }
+            },
+            Some("mv") => {
+                let args: Vec<&str> = tail.split_whitespace().collect();
+                if args.len() < 2 {
+                    println!("mv: missing source or destination argument");
+                } else {
+                    mv(args[0], args[1]);
                 }
             },
             Some("ls") => ls(),   

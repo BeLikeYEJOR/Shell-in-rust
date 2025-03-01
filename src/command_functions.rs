@@ -85,3 +85,10 @@ pub fn help(tail: String, list_of_commands:&HashMap<&str, &str>) {
         },
     }
 }
+
+pub fn mv(source: &str, destination: &str) {
+    match fs::rename(source, destination) {
+        Ok(_) => println!("Moved {} to {}", source, destination),
+        Err(e) => println!("Error moving {}: {}", source, e),
+    }
+}
