@@ -17,6 +17,11 @@ pub fn command_setup() -> HashMap<&'static str, &'static str> {
     list_of_commands.insert("touch", "touch <fileName>");
     list_of_commands.insert("rmf", "rmf <fileName>");
     list_of_commands.insert("ls", "ls");
+    list_of_commands.insert("mv", "mv <oldFile> <newFile>");
+    list_of_commands.insert("cat", "cat <fileName>");
+    list_of_commands.insert("write", "write <fileName> <fileContent>");
+    list_of_commands.insert("writeon", "writeon <fileName> <fileContent>");
+    list_of_commands.insert("wc", "wc <fileName>");
     list_of_commands
 }
 

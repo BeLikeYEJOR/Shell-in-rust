@@ -1,6 +1,14 @@
 use std::env;
 use std::fs;
 use std::collections::HashMap;
+use std::fs::OpenOptions;
+use std::io::Write;
+use crossterm::{
+    event::{self, Event, KeyCode},
+    terminal::{enable_raw_mode, disable_raw_mode},
+};
+use std::time::Duration;
+use std::error::Error;
 // mod command_list;
 // use command_list::command_setup;
 // use command_list::get_prompt;
@@ -91,4 +99,113 @@ pub fn mv(source: &str, destination: &str) {
         Ok(_) => println!("Moved {} to {}", source, destination),
         Err(e) => println!("Error moving {}: {}", source, e),
     }
+}
+
+pub fn cat(file_name: String) {
+    let file_text = match fs::read_to_string(file_name) {
+        Ok(text) => text,
+        Err(e) => {
+            println!("{}", e);
+            return;
+        }
+
+    };
+    println!("{:?}", file_text)
+}
+
+pub fn write(file_name: &str, text_content: &[&str]) {
+    // let text = fs::write(file_name, text_content);
+    if let Err(e) = fs::write(file_name, text_content.join(" ")) {
+        println!("{}", e);
+    }
+}
+
+pub fn writeon(file_name: &str, text_content: &[&str]) {
+// Join the text slice into a single string separated by spaces.
+    let text_to_append = text_content.join(" ");
+    
+    // Open the file in append mode, create it if it doesn't exist.
+    let mut file = match OpenOptions::new().append(true).create(true).open(file_name) {
+        Ok(f) => f,
+        Err(e) => {
+            println!("Error opening {}: {}", file_name, e);
+            return;
+        }
+    };
+
+    // Write the text to the file.
+    if let Err(e) = file.write_all(text_to_append.as_bytes()) {
+        println!("Error writing to {}: {}", file_name, e);
+    } else {
+        println!("Successfully appended to {}", file_name);
+    }
+}
+
+pub fn wc(file_name: &str) {
+       // Check if a file name was provided.
+       if file_name.is_empty() {
+        println!("wc: missing file name");
+        return;
+    }
+
+    // Try to read the file as a string.
+    match fs::read_to_string(file_name) {
+        Ok(content) => {
+            // Count the number of lines.
+            let line_count = content.lines().count();
+            // Count the number of words by splitting on whitespace.
+            let word_count = content.split_whitespace().count();
+            // Count the number of bytes.
+            let byte_count = content.as_bytes().len();
+            // Print the results.
+            println!("{}: {} lines, {} words, {} bytes", file_name, line_count, word_count, byte_count);
+        }
+        Err(e) => println!("wc: error reading {}: {}", file_name, e),
+    }
+}
+
+pub fn history_mode(history: &Vec<String>) -> Result<(), Box<dyn Error>> {
+    // Enable raw mode so key presses are captured immediately.
+    enable_raw_mode()?;
+    println!("Entered history mode. Use Up Arrow to scroll through history, Down Arrow for next entry. Press Esc or 'q' to exit.");
+
+    // Start with the index past the end so that pressing Up shows the most recent command.
+    let mut index = history.len();
+
+    loop {
+        // Poll for a key event.
+        if event::poll(Duration::from_millis(100))? {
+            match event::read()? {
+                Event::Key(key_event) => {
+                    match key_event.code {
+                        // Up Arrow: move backward in history.
+                        KeyCode::Up => {
+                            if index > 0 {
+                                index -= 1;
+                                // Print the history entry. (You could also update a prompt.)
+                                println!("{}", history[index]);
+                            }
+                        },
+                        // Down Arrow: move forward in history.
+                        KeyCode::Down => {
+                            if index < history.len() - 1 {
+                                index += 1;
+                                println!("History: {}", history[index]);
+                            }
+                        },
+                        // Exit history mode on Esc or 'q'
+                        KeyCode::Esc | KeyCode::Char('q') => {
+                            break;
+                        },
+                        _ => {}
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+
+    disable_raw_mode()?;
+    println!("Exited history mode.");
+    Ok(())
 }

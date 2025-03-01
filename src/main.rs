@@ -7,6 +7,11 @@ use command_functions::ls;
 use command_functions::cd;
 use command_functions::help;
 use command_functions::mv;
+use command_functions::cat;
+use command_functions::write;
+use command_functions::writeon;
+use command_functions::wc;
+use command_functions::history_mode;
 use command_list::command_setup;
 use command_list::get_prompt;
 
@@ -75,7 +80,37 @@ fn main() {
                     mv(args[0], args[1]);
                 }
             },
+            Some("cat") => cat(tail),
             Some("ls") => ls(),   
+            Some("write") => {
+                let args: Vec<&str> = tail.split_whitespace().collect();
+                if args.len() < 2 {
+                    println!("Missing File or Text Content");
+                } else {
+                    write(args[0], &args[1..]);
+                }
+            },
+            Some("writeon") => {
+                let args: Vec<&str> = tail.split_whitespace().collect();
+                if args.len() < 2 {
+                    println!("Missing file or text content for writeon");
+                } else {
+                    writeon(args[0], &args[1..]);
+                }
+            },
+            Some("wc") => {
+                wc(tail.as_str());
+            },
+            // Some("mode") => {
+            //     match tail.trim() {
+            //         s if s == "history" => {
+            //             if let Err(e) = history_mode(&command_history) {
+            //                 println!("Error in history mode: {}", e);
+            //             }
+            //         }
+            //         _ => println!("unknown mode")
+            //     }
+            // },
             _ => println!("{}: command not found", input.trim()),
         }
     }
