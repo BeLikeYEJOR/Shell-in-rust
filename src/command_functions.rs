@@ -1,5 +1,6 @@
 use std::env;
 use std::fs;
+use chrono::Local;
 use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::Write;
@@ -165,6 +166,7 @@ pub fn wc(file_name: &str) {
 }
 
 pub fn history_mode(history: &Vec<String>) -> Result<(), Box<dyn Error>> {
+
     // Enable raw mode so key presses are captured immediately.
     enable_raw_mode()?;
     println!("Entered history mode. Use Up Arrow to scroll through history, Down Arrow for next entry. Press Esc or 'q' to exit.");
@@ -209,3 +211,9 @@ pub fn history_mode(history: &Vec<String>) -> Result<(), Box<dyn Error>> {
     println!("Exited history mode.");
     Ok(())
 }
+
+pub fn date() {
+    let date = Local::now();
+    println!("{:}", date);
+}
+

@@ -11,7 +11,7 @@ use command_functions::cat;
 use command_functions::write;
 use command_functions::writeon;
 use command_functions::wc;
-use command_functions::history_mode;
+use command_functions::date;
 use command_list::command_setup;
 use command_list::get_prompt;
 
@@ -111,6 +111,7 @@ fn main() {
             //         _ => println!("unknown mode")
             //     }
             // },
+            Some("date") => date(),
             _ => println!("{}: command not found", input.trim()),
         }
     }
