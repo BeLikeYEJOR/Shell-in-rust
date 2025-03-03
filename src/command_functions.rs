@@ -1,12 +1,13 @@
 use chrono::Local;
+use core::str;
 use std::collections::HashMap;
 use std::env;
+use std::env::consts::OS;
 use std::fs;
 use std::fs::OpenOptions;
 use std::io::Write;
 use std::net::{TcpListener, TcpStream};
 use std::process::Command;
-use std::str;
 use std::thread;
 // mod command_list;
 // use command_list::command_setup;
@@ -169,14 +170,31 @@ pub fn date() {
 }
 
 pub fn ports() {
-    let output = Command::new("sh")
-        .arg("-c")
-        .arg("lsof -iTCP -sTCP:LISTEN -P -n | grep 127.0.0.1")
-        .output()
-        .expect("Failed to execute the command");
-
-    let stdout = str::from_utf8(&output.stdout).expect("failed to convert output to string");
-    println!("{}", stdout);
+    if OS == "macos" {
+        let output = Command::new("sh")
+            .arg("-c")
+            .arg("lsof -iTCP -sTCP:LISTEN -P -n | grep 127.0.0.1")
+            .output()
+            .expect("Failed to execute the command");
+        let stdout = str::from_utf8(&output.stdout).expect("failed to convert output to string");
+        println!("{}", stdout);
+    } else if OS == "windows" {
+        let output = Command::new("sh")
+            .arg("-c")
+            .arg("netstat -an | findstr 127.0.0.1")
+            .output()
+            .expect("failed to execute the command");
+        let stdout = str::from_utf8(&output.stdout).expect("failed to convert output to string");
+        println!("{}", stdout);
+    } else if OS == "linux" {
+        let output = Command::new("sh")
+            .arg("-c")
+            .arg("ss -tuln | grep 127.0.0.1")
+            .output()
+            .expect("failed to execute the command");
+        let stdout = str::from_utf8(&output.stdout).expect("failed to convert output to string");
+        println!("{}", stdout);
+    }
 }
 
 pub fn run_port(port_num: String) {
