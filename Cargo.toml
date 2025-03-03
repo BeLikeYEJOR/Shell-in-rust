@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+cargo-watch = "8.5.3"
 chrono = "0.4.40"
 crossterm = "0.28.1"
 

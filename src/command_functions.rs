@@ -1,13 +1,13 @@
-use std::env;
-use std::fs;
 use chrono::Local;
 use std::collections::HashMap;
+use std::env;
+use std::fs;
 use std::fs::OpenOptions;
 use std::io::Write;
+use std::net::{TcpListener, TcpStream};
 use std::process::Command;
+use std::str;
 use std::thread;
-use std::time::Duration;
-// use std::net::TcpListener;
 // mod command_list;
 // use command_list::command_setup;
 // use command_list::get_prompt;
@@ -33,63 +33,59 @@ pub fn ls() {
                                 } else {
                                     println!("{}", file_name);
                                 }
-                            },
+                            }
                             Err(e) => println!("Error reading metadata: {}", e),
                         }
-                    },
+                    }
                     Err(e) => println!("Error reading directory entry: {}", e),
                 }
             }
-        },
+        }
         Err(e) => println!("Error reading directory: {}", e),
     }
 }
 
 pub fn cd(tail: String) {
     match tail.as_str() {
-        s if s.is_empty() => {
-            match env::current_dir() {
-                Ok(current_path) => println!("{}", current_path.display()),
-                Err(e) => println!("Error retrieving current directory: {}", e),
-            }
-        },                    
-        s if s == ".." => {
-            match env::current_dir() {
-                Ok(current_path) => {
-                    if let Some(parent) = current_path.parent() {
-                        if let Err(e) = env::set_current_dir(parent) {
-                            println!("cd: failed to change directory: {}", e);
-                        }
-                    } else {
-                        println!("cd: no parent directory");
+        s if s.is_empty() => match env::current_dir() {
+            Ok(current_path) => println!("{}", current_path.display()),
+            Err(e) => println!("Error retrieving current directory: {}", e),
+        },
+        s if s == ".." => match env::current_dir() {
+            Ok(current_path) => {
+                if let Some(parent) = current_path.parent() {
+                    if let Err(e) = env::set_current_dir(parent) {
+                        println!("cd: failed to change directory: {}", e);
                     }
-                },
-                Err(e) => println!("cd: error getting current directory: {}", e),
+                } else {
+                    println!("cd: no parent directory");
+                }
             }
+            Err(e) => println!("cd: error getting current directory: {}", e),
         },
         _ => {
             if let Err(e) = env::set_current_dir(&tail) {
                 println!("cd: {}: {}", &tail, e);
             }
-        },
+        }
     }
 }
 
-pub fn help(tail: String, list_of_commands:&HashMap<&str, &str>) {
+pub fn help(tail: String, list_of_commands: &HashMap<&str, &str>) {
     match tail.as_str() {
         s if s.is_empty() => {
             for (cmd, desc) in list_of_commands {
                 println!("{} - {}", cmd, desc);
             }
-        },
+        }
         s if list_of_commands.get(s).is_some() => {
             if let Some(desc) = list_of_commands.get(s) {
                 println!("{} - {}", tail, desc);
             }
-        },
+        }
         _ => {
             println!("{}: is not a valid command", tail);
-        },
+        }
     }
 }
 
@@ -107,7 +103,6 @@ pub fn cat(file_name: String) {
             println!("{}", e);
             return;
         }
-
     };
 
     // let cleaned_text = file_text.replace("\n", "").replace("\t", "");
@@ -122,9 +117,9 @@ pub fn write(file_name: &str, text_content: &[&str]) {
 }
 
 pub fn writeon(file_name: &str, text_content: &[&str]) {
-// Join the text slice into a single string separated by spaces.
+    // Join the text slice into a single string separated by spaces.
     let text_to_append = text_content.join(" ");
-    
+
     // Open the file in append mode, create it if it doesn't exist.
     let mut file = match OpenOptions::new().append(true).create(true).open(file_name) {
         Ok(f) => f,
@@ -143,8 +138,8 @@ pub fn writeon(file_name: &str, text_content: &[&str]) {
 }
 
 pub fn wc(file_name: &str) {
-       // Check if a file name was provided.
-       if file_name.is_empty() {
+    // Check if a file name was provided.
+    if file_name.is_empty() {
         println!("wc: missing file name");
         return;
     }
@@ -159,7 +154,10 @@ pub fn wc(file_name: &str) {
             // Count the number of bytes.
             let byte_count = content.as_bytes().len();
             // Print the results.
-            println!("{}: {} lines, {} words, {} bytes", file_name, line_count, word_count, byte_count);
+            println!(
+                "{}: {} lines, {} words, {} bytes",
+                file_name, line_count, word_count, byte_count
+            );
         }
         Err(e) => println!("wc: error reading {}: {}", file_name, e),
     }
@@ -168,4 +166,42 @@ pub fn wc(file_name: &str) {
 pub fn date() {
     let date = Local::now();
     println!("{:}", date);
+}
+
+pub fn ports() {
+    let output = Command::new("sh")
+        .arg("-c")
+        .arg("lsof -iTCP -sTCP:LISTEN -P -n | grep 127.0.0.1")
+        .output()
+        .expect("Failed to execute the command");
+
+    let stdout = str::from_utf8(&output.stdout).expect("failed to convert output to string");
+    println!("{}", stdout);
+}
+
+pub fn run_port(port_num: String) {
+    let addr = format!("127.0.0.1:{}", port_num);
+    let listener = TcpListener::bind(addr.clone()).unwrap();
+    println!("Listening on {}", addr);
+
+    // Loop indefinitely over incoming connections.
+    for stream in listener.incoming() {
+        match stream {
+            Ok(stream) => {
+                // Handle each connection in a new thread.
+                thread::spawn(|| {
+                    handle_connection(stream);
+                });
+            }
+            Err(e) => {
+                println!("Connection failed: {}", e);
+            }
+        }
+    }
+}
+
+fn handle_connection(mut stream: TcpStream) {
+    // For demonstration purposes, we'll send a simple HTTP response.
+    let response = "HTTP/1.1 200 OK\r\n\r\nHello, world!";
+    stream.write_all(response.as_bytes()).unwrap();
 }

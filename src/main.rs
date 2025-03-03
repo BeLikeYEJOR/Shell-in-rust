@@ -1,27 +1,27 @@
 // use std::env;
 use std::fs::{self};
 use std::io::{self, Write};
-mod command_list;
 mod command_functions;
-mod port_handeling;
-use command_functions::ls;
-use command_functions::cd;
-use command_functions::help;
-use command_functions::mv;
+mod command_list;
 use command_functions::cat;
+use command_functions::cd;
+use command_functions::date;
+use command_functions::help;
+use command_functions::ls;
+use command_functions::mv;
+use command_functions::ports;
+use command_functions::run_port;
+use command_functions::wc;
 use command_functions::write;
 use command_functions::writeon;
-use command_functions::wc;
-use command_functions::date;
 use command_list::command_setup;
 use command_list::get_prompt;
 
 fn main() {
-    
     let stdin = io::stdin();
     let mut command_history: Vec<String> = Vec::new();
     let list_of_commands = command_setup();
-    
+
     loop {
         // Use get_prompt() to display a shorter prompt.
         print!("{} $ ", get_prompt());
@@ -40,49 +40,49 @@ fn main() {
             Some("exit") => std::process::exit(0),
             Some("echo") => println!("{}", tail),
             Some("type") => match tail.as_str() {
-                "echo" | "exit" | "type" | "help" | "cd"  => println!("{tail} is a shell builtin"),
+                "echo" | "exit" | "type" | "help" | "cd" => println!("{tail} is a shell builtin"),
                 _ => println!("{tail}: not found"),
             },
             Some("help") => {
                 help(tail, &list_of_commands);
-            },
+            }
             Some("cls") | Some("clear") => println!("\x1B[2J\x1B[1;1H"),
             Some("history") => {
                 for (i, cmd) in command_history.iter().enumerate() {
                     println!("{}: {}", i + 1, cmd);
                 }
-            },
+            }
             Some("cd") => cd(tail),
             Some("mkdir") => {
                 if let Err(e) = fs::create_dir_all(tail) {
-                    println!("{}", e);
+                    eprintln!("{}", e);
                 }
-            },
+            }
             Some("rmdir") => {
                 if let Err(e) = fs::remove_dir(tail) {
-                    println!("{}", e);
+                    eprintln!("{}", e);
                 }
-            },
+            }
             Some("touch") => {
                 if let Err(e) = fs::File::create(tail) {
-                    println!("{}", e);
+                    eprintln!("{}", e);
                 }
-            },
+            }
             Some("rmf") => {
                 if let Err(e) = fs::remove_file(tail) {
-                    println!("{}", e);
+                    eprintln!("{}", e);
                 }
-            },
+            }
             Some("mv") => {
                 let args: Vec<&str> = tail.split_whitespace().collect();
                 if args.len() < 2 {
-                    println!("mv: missing source or destination argument");
+                    eprintln!("mv: missing source or destination argument");
                 } else {
                     mv(args[0], args[1]);
                 }
-            },
+            }
             Some("cat") => cat(tail),
-            Some("ls") => ls(),   
+            Some("ls") => ls(),
             Some("write") => {
                 let args: Vec<&str> = tail.split_whitespace().collect();
                 if args.len() < 2 {
@@ -90,7 +90,7 @@ fn main() {
                 } else {
                     write(args[0], &args[1..]);
                 }
-            },
+            }
             Some("writeon") => {
                 let args: Vec<&str> = tail.split_whitespace().collect();
                 if args.len() < 2 {
@@ -98,10 +98,10 @@ fn main() {
                 } else {
                     writeon(args[0], &args[1..]);
                 }
-            },
+            }
             Some("wc") => {
                 wc(tail.as_str());
-            },
+            }
             // Some("mode") => {
             //     match tail.trim() {
             //         s if s == "history" => {
@@ -113,6 +113,8 @@ fn main() {
             //     }
             // },
             Some("date") => date(),
+            Some("ports") => ports(),
+            Some("runport") => run_port(tail),
             _ => println!("{}: command not found", input.trim()),
         }
     }
