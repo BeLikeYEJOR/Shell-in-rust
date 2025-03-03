@@ -3,6 +3,7 @@ use std::fs::{self};
 use std::io::{self, Write};
 mod command_list;
 mod command_functions;
+mod port_handeling;
 use command_functions::ls;
 use command_functions::cd;
 use command_functions::help;

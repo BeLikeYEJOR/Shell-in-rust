@@ -22,6 +22,7 @@ pub fn command_setup() -> HashMap<&'static str, &'static str> {
     list_of_commands.insert("write", "write <fileName> <fileContent>");
     list_of_commands.insert("writeon", "writeon <fileName> <fileContent>");
     list_of_commands.insert("wc", "wc <fileName>");
+    list_of_commands.insert("date", "date");
     list_of_commands
 }
 

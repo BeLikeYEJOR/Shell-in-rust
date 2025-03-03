@@ -4,12 +4,10 @@ use chrono::Local;
 use std::collections::HashMap;
 use std::fs::OpenOptions;
 use std::io::Write;
-use crossterm::{
-    event::{self, Event, KeyCode},
-    terminal::{enable_raw_mode, disable_raw_mode},
-};
+use std::process::Command;
+use std::thread;
 use std::time::Duration;
-use std::error::Error;
+// use std::net::TcpListener;
 // mod command_list;
 // use command_list::command_setup;
 // use command_list::get_prompt;
@@ -111,7 +109,9 @@ pub fn cat(file_name: String) {
         }
 
     };
-    println!("{:?}", file_text)
+
+    // let cleaned_text = file_text.replace("\n", "").replace("\t", "");
+    println!("{}", file_text)
 }
 
 pub fn write(file_name: &str, text_content: &[&str]) {
@@ -165,55 +165,7 @@ pub fn wc(file_name: &str) {
     }
 }
 
-pub fn history_mode(history: &Vec<String>) -> Result<(), Box<dyn Error>> {
-
-    // Enable raw mode so key presses are captured immediately.
-    enable_raw_mode()?;
-    println!("Entered history mode. Use Up Arrow to scroll through history, Down Arrow for next entry. Press Esc or 'q' to exit.");
-
-    // Start with the index past the end so that pressing Up shows the most recent command.
-    let mut index = history.len();
-
-    loop {
-        // Poll for a key event.
-        if event::poll(Duration::from_millis(100))? {
-            match event::read()? {
-                Event::Key(key_event) => {
-                    match key_event.code {
-                        // Up Arrow: move backward in history.
-                        KeyCode::Up => {
-                            if index > 0 {
-                                index -= 1;
-                                // Print the history entry. (You could also update a prompt.)
-                                println!("{}", history[index]);
-                            }
-                        },
-                        // Down Arrow: move forward in history.
-                        KeyCode::Down => {
-                            if index < history.len() - 1 {
-                                index += 1;
-                                println!("History: {}", history[index]);
-                            }
-                        },
-                        // Exit history mode on Esc or 'q'
-                        KeyCode::Esc | KeyCode::Char('q') => {
-                            break;
-                        },
-                        _ => {}
-                    }
-                }
-                _ => {}
-            }
-        }
-    }
-
-    disable_raw_mode()?;
-    println!("Exited history mode.");
-    Ok(())
-}
-
 pub fn date() {
     let date = Local::now();
     println!("{:}", date);
 }
-
